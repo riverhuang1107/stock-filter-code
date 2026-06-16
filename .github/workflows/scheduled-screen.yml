@@ -1,0 +1,47 @@
+name: Scheduled A-share screen
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekdays after the China A-share close: 16:30 Asia/Shanghai = 08:30 UTC.
+    - cron: "30 8 * * 1-5"
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      MAIL_FROM: ${{ secrets.MAIL_FROM }}
+      MPLCONFIGDIR: /tmp/stock-filter-matplotlib
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run screener and send email
+        run: python -m stock_filter_tool run --top 10 --days 3 --chart-days 5 --send-email
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-filter-report
+          path: reports/
+          if-no-files-found: ignore

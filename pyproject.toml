@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-filter-tool"
+version = "0.1.0"
+description = "A-share bullish engulfing stock screener with performance, volume ranking, charts, and email reports."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "akshare>=1.14.0",
+    "matplotlib>=3.8.0",
+    "pandas>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+stock-filter = "stock_filter_tool.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["stock_filter_tool*"]
