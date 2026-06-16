@@ -6,6 +6,7 @@
 # Generated reports and runtime output
 reports/
 logs/
+.tools/
 
 # Python
 __pycache__/
