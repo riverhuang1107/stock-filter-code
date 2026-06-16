@@ -28,7 +28,7 @@ def send_report_email(
     attachments: list[Path] | None = None,
 ) -> None:
     load_dotenv()
-    service = _build_gmail_service()
+    creds = _load_credentials()
     msg = build_report_message(
         html=html,
         recipients=recipients or DEFAULT_RECIPIENTS,
@@ -36,7 +36,7 @@ def send_report_email(
         attachments=attachments or [],
     )
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
-    service.users().messages().send(userId="me", body={"raw": raw}).execute()
+    _send_raw_message(creds, raw)
 
 
 def authorize_gmail(force: bool = False, console: bool = False) -> Path:
@@ -76,11 +76,16 @@ def build_report_message(
     return msg
 
 
-def _build_gmail_service():
-    from googleapiclient.discovery import build
+def _send_raw_message(creds: Any, raw: str) -> None:
+    from google.auth.transport.requests import AuthorizedSession
 
-    creds = _load_credentials()
-    return build("gmail", "v1", credentials=creds)
+    session = AuthorizedSession(creds)
+    response = session.post(
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        json={"raw": raw},
+        timeout=60,
+    )
+    response.raise_for_status()
 
 
 def _load_credentials():
