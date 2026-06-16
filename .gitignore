@@ -7,6 +7,8 @@
 reports/
 logs/
 .tools/
+.runtime/
+secrets/
 
 # Python
 __pycache__/

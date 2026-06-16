@@ -25,16 +25,33 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--send-email", action="store_true", help="发送邮件")
     run.add_argument("--no-email", action="store_true", help="不发送邮件")
     run.add_argument("--recipient", action="append", default=None, help="额外或自定义收件人，可重复传入")
+    auth = subparsers.add_parser("gmail-auth", help="首次授权 Gmail API 并保存本地 token")
+    auth.add_argument("--force", action="store_true", help="即使 token 已存在也重新授权")
+    auth.add_argument("--console", action="store_true", help="使用控制台授权码流程，不启动本地浏览器回调")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    if args.command != "run":
-        parser.print_help()
-        return 0
-    return run(args)
+    if args.command == "run":
+        return run(args)
+    if args.command == "gmail-auth":
+        return gmail_auth(args)
+    parser.print_help()
+    return 0
+
+
+def gmail_auth(args: argparse.Namespace) -> int:
+    from .emailer import authorize_gmail
+
+    try:
+        token_path = authorize_gmail(force=args.force, console=args.console)
+    except Exception as exc:
+        print(f"Unable to authorize Gmail API: {exc}", file=sys.stderr)
+        return 1
+    print(f"Gmail OAuth token saved to: {token_path}")
+    return 0
 
 
 def run(args: argparse.Namespace) -> int:
