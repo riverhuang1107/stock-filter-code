@@ -27,10 +27,18 @@ def _detect_at(bars: pd.DataFrame, idx: int) -> Signal | None:
     prev_is_small_yin = prev["close"] < prev["open"] and prev_body / prev_ref <= 0.025
     cur_is_big_yang = cur["close"] > cur["open"] and cur_body / cur_ref >= 0.03
     body_engulfs = cur["open"] <= prev["close"] and cur["close"] >= prev["open"]
+    range_engulfs = cur["low"] <= prev["low"] and cur["high"] >= prev["high"]
     body_ratio = cur_body / max(prev_body, 0.01)
     high_low = max(float(cur["high"] - cur["low"]), 0.01)
     close_position = (cur["close"] - cur["low"]) / high_low
-    if not (prev_is_small_yin and cur_is_big_yang and body_engulfs and body_ratio >= 1.5 and close_position >= 0.65):
+    if not (
+        prev_is_small_yin
+        and cur_is_big_yang
+        and body_engulfs
+        and range_engulfs
+        and body_ratio >= 1.5
+        and close_position >= 0.65
+    ):
         return None
     history = bars.iloc[max(0, idx - 5):idx]
     avg_volume = float(history["volume"].mean()) if not history.empty else float(cur["volume"])

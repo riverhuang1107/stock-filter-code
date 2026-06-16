@@ -26,3 +26,13 @@ def test_bullish_engulfing_signal_rejects_non_engulfing():
         ]
     )
     assert find_bullish_engulfing_signal(bars, days=3) is None
+
+
+def test_bullish_engulfing_signal_rejects_body_only_engulfing():
+    bars = pd.DataFrame(
+        [
+            {"date": "2026-06-12", "open": 11.01, "close": 10.98, "high": 11.06, "low": 10.81, "volume": 6578348},
+            {"date": "2026-06-15", "open": 10.97, "close": 11.84, "high": 12.08, "low": 10.97, "volume": 11070888},
+        ]
+    )
+    assert find_bullish_engulfing_signal(bars, days=3) is None

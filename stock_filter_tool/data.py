@@ -29,6 +29,8 @@ def _normalize_code(code: object) -> str:
 
 
 def _market_prefix(code: str) -> str:
+    if code.startswith(("4", "8", "920")):
+        return "bj"
     return "sh" if code.startswith(("5", "6", "9")) else "sz"
 
 
@@ -182,6 +184,8 @@ def _load_sina_daily_raw(code: str, datalen: int) -> pd.DataFrame:
         timeout=10,
     )
     data = response.json()
+    if not data:
+        return pd.DataFrame()
     return pd.DataFrame(
         {
             "date": row.get("day"),
