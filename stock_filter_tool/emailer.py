@@ -41,6 +41,9 @@ def send_report_email(
 
 def authorize_gmail(force: bool = False, console: bool = False) -> Path:
     load_dotenv()
+    # OAuth desktop apps use a localhost loopback redirect. oauthlib blocks
+    # plain HTTP unless this flag is set explicitly for local authorization.
+    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
     token_path = _token_path()
     if token_path.exists() and not force:
         return token_path
