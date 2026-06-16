@@ -67,6 +67,12 @@ python -m stock_filter_tool run --top 10 --no-email --output reports/latest.html
 python -m stock_filter_tool run --top 10 --no-email --limit 100
 ```
 
+## 数据源策略
+
+- 股票列表：优先使用东方财富公开列表接口，并在代码中忽略本机代理以规避部分代理断连；失败时退回 AkShare 的 A 股代码表。
+- 历史 K 线：优先使用新浪日 K 接口，失败时使用腾讯前复权日 K 接口。
+- 财务指标：继续使用 AkShare 财务接口，仅对技术候选池做财务重排，避免全市场逐只请求财务导致云任务超时。
+
 ## 输出
 
 默认输出到 `reports/`：
