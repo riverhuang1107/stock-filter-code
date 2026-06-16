@@ -49,7 +49,7 @@ def authorize_gmail(force: bool = False, console: bool = False) -> Path:
     if console:
         creds = _run_console_flow(flow)
     else:
-        creds = flow.run_local_server(port=0)
+        creds = flow.run_local_server(port=8080, host="localhost", open_browser=True)
 
     _save_token(creds, token_path)
     return token_path
@@ -105,11 +105,13 @@ def _load_installed_app_flow():
 
 
 def _run_console_flow(flow: Any):
+    flow.redirect_uri = "http://localhost"
     auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
     print("Open this URL in a browser and authorize Gmail sending:")
     print(auth_url)
-    code = input("Paste the authorization code here: ").strip()
-    flow.fetch_token(code=code)
+    print("After approval, copy the full redirected URL from the browser address bar.")
+    redirected_url = input("Paste the full redirected URL here: ").strip()
+    flow.fetch_token(authorization_response=redirected_url)
     return flow.credentials
 
 
