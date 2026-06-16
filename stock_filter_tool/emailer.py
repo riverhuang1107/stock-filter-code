@@ -27,14 +27,19 @@ def send_report_email(
     user = os.getenv("SMTP_USER")
     password = os.getenv("SMTP_PASSWORD")
     sender = os.getenv("MAIL_FROM") or user
-    missing = [name for name, value in {
-        "SMTP_HOST": host,
-        "SMTP_USER": user,
-        "SMTP_PASSWORD": password,
-        "MAIL_FROM/SMTP_USER": sender,
-    }.items() if not value]
+    missing = [
+        name
+        for name, value in {
+            "SMTP_HOST": host,
+            "SMTP_USER": user,
+            "SMTP_PASSWORD": password,
+            "MAIL_FROM/SMTP_USER": sender,
+        }.items()
+        if not value
+    ]
     if missing:
         raise RuntimeError(f"Missing SMTP configuration: {', '.join(missing)}")
+
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = sender
@@ -43,6 +48,7 @@ def send_report_email(
     msg.add_alternative(html, subtype="html")
     for path in attachments or []:
         msg.add_attachment(path.read_bytes(), maintype="application", subtype="octet-stream", filename=path.name)
+
     with smtplib.SMTP(host, port, timeout=30) as smtp:
         smtp.starttls()
         smtp.login(user, password)
