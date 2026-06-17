@@ -3,8 +3,8 @@ name: Scheduled A-share screen
 on:
   workflow_dispatch:
   schedule:
-    # Weekdays after the China A-share close: 16:30 Asia/Shanghai = 08:30 UTC.
-    - cron: "30 8 * * 1-5"
+    # Weekdays after the China A-share close: 17:30 Asia/Shanghai = 09:30 UTC.
+    - cron: "30 9 * * 1-5"
 
 jobs:
   screen:
