@@ -29,3 +29,6 @@ stock-filter = "stock_filter_tool.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["stock_filter_tool*"]
+
+[tool.setuptools.package-data]
+stock_filter_tool = ["resources/*.csv"]

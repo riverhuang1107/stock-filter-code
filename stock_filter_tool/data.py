@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
 import json
+from pathlib import Path
 import time
 from typing import Iterable
 
@@ -13,6 +13,7 @@ from .utils import first_existing, to_float
 
 
 USER_AGENT = "Mozilla/5.0"
+PACKAGE_UNIVERSE_FILE = Path(__file__).with_name("resources") / "a_share_universe.csv"
 
 
 def _import_akshare():
@@ -41,16 +42,25 @@ def is_non_st_name(name: str) -> bool:
 
 
 def load_a_share_universe(limit: int | None = None) -> list[StockMeta]:
+    errors: list[str] = []
     try:
         spot = _load_eastmoney_universe_raw(limit=limit)
-    except Exception:
+    except Exception as exc:
+        errors.append(f"eastmoney: {exc}")
         try:
             ak = _import_akshare()
             spot = ak.stock_info_a_code_name().rename(columns={"code": "code", "name": "name"})
-        except Exception as exc:
-            raise RuntimeError(
-                "Failed to load A-share universe. Check network access, proxy settings, or try again later."
-            ) from exc
+        except Exception as ak_exc:
+            errors.append(f"akshare: {ak_exc}")
+            try:
+                spot = _load_packaged_universe_raw(limit=limit)
+            except Exception as fallback_exc:
+                errors.append(f"packaged fallback: {fallback_exc}")
+                detail = " | ".join(errors)
+                raise RuntimeError(
+                    "Failed to load A-share universe. Check network access, proxy settings, or try again later. "
+                    f"Details: {detail}"
+                ) from fallback_exc
 
     stocks: list[StockMeta] = []
     for _, row in spot.iterrows():
@@ -71,6 +81,15 @@ def load_a_share_universe(limit: int | None = None) -> list[StockMeta]:
         if limit and len(stocks) >= limit:
             break
     return stocks
+
+
+def _load_packaged_universe_raw(limit: int | None = None) -> pd.DataFrame:
+    if not PACKAGE_UNIVERSE_FILE.exists():
+        raise FileNotFoundError(PACKAGE_UNIVERSE_FILE)
+    frame = pd.read_csv(PACKAGE_UNIVERSE_FILE, dtype={"code": str})
+    if limit:
+        frame = frame.head(limit)
+    return frame
 
 
 def load_daily_bars(code: str, lookback_calendar_days: int = 45) -> pd.DataFrame:
