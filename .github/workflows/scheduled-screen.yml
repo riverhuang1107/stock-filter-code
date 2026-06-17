@@ -3,12 +3,10 @@ name: Scheduled A-share screen
 on:
   workflow_dispatch:
   schedule:
-    # Weekdays after the China A-share close.
-    - cron: "30 17 * * 1-5"
-      timezone: "Asia/Shanghai"
-    # Temporary probe to verify scheduled runs on 2026-06-17.
-    - cron: "55 17 * * 1-5"
-      timezone: "Asia/Shanghai"
+    # Weekdays after the China A-share close: 17:30 Asia/Shanghai = 09:30 UTC.
+    - cron: "30 9 * * 1-5"
+    # Temporary UTC probe to verify scheduled runs on 2026-06-17: 18:20 Asia/Shanghai.
+    - cron: "20 10 * * 1-5"
 
 jobs:
   screen:
