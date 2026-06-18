@@ -3,8 +3,8 @@ name: Scheduled A-share screen
 on:
   workflow_dispatch:
   schedule:
-    # Daily 17:00 Asia/Shanghai = 09:00 UTC.
-    - cron: "0 9 * * *"
+    # Daily 14:20 Asia/Shanghai = 06:20 UTC; offsets observed GitHub schedule delays to finish before 17:30.
+    - cron: "20 6 * * *"
 
 jobs:
   screen:
